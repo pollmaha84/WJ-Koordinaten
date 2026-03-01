@@ -247,7 +247,19 @@ let mSvg = {x:0, y:0};
 // Persist
 const SK = 'wjcoord4';
 function save(){ try{ localStorage.setItem(SK, JSON.stringify({pts,nextId,autoN,colorI})); }catch(_){} }
-function load(){ try{ const d=JSON.parse(localStorage.getItem(SK)||'null'); if(d){ pts=d.pts||[]; nextId=d.nextId||1; autoN=d.autoN||1; colorI=d.colorI||0; } }catch(_){} }
+function load(){
+  try{
+    const raw=localStorage.getItem(SK);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(!Array.isArray(d.pts)) throw new Error('bad data');
+    pts=d.pts; nextId=d.nextId||1; autoN=d.autoN||1; colorI=d.colorI||0;
+  }catch(_){
+    // Corrupted — wipe and start clean
+    try{ localStorage.removeItem(SK); }catch(__){ }
+    pts=[]; nextId=1; autoN=1; colorI=0;
+  }
+}
 
 function nc(){ return COLORS[(colorI++)%COLORS.length]; }
 
